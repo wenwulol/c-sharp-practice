@@ -33,6 +33,8 @@ namespace FiniteStateMachine
 
             state.MetMonster();
             Console.WriteLine(state);
+
+            Console.WriteLine("End");
             Console.ReadLine();
         }
     }

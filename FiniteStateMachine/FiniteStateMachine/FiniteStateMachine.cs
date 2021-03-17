@@ -6,46 +6,56 @@ using System.Threading.Tasks;
 
 namespace FiniteStateMachine
 {
-    class FiniteStateMachine
+    class FiniteStateMachine : IState
     {
-
-        enum internalState
-        {
-            SmallMario,
-            SuperMario,
-            FireMario,
-            CapMario
-        }
-        private internalState State { get; set; }
         public int LifeCount { get; private set; }
         public int CoinCount { get; private set; }
+        public IState state;
+
+        private SmallMario smallMario;
+        private SuperMario superMario;
+        private FireMario fireMario;
+        private CapeMario capeMario;
 
         public FiniteStateMachine()
         {
             LifeCount = 1;
             CoinCount = 0;
-            State = internalState.SmallMario;
+
+            smallMario = new SmallMario(this);
+            superMario = new SuperMario(this);
+            fireMario = new FireMario(this);
+            capeMario = new CapeMario(this);
+
+            state = smallMario;
+        }
+        public IState GetState(string stateId)
+        {
+            switch (stateId)
+            {
+                case "smallMario":
+                    return smallMario;
+                case "superMario":
+                    return superMario;
+                case "fireMario":
+                    return fireMario;
+                case "capeMario":
+                    return capeMario;
+                default:
+                    return null;
+            }
         }
         public void GotMushroom()
         {
-            Console.WriteLine("Got Mushroom");
-            if (State == internalState.SmallMario)
-            {
-                State = internalState.SuperMario;
-            }
-            GotCoins(100);
+            state.GotMushroom();
         }
         public void GotFireFlower()
         {
-            Console.WriteLine("Got FireFlower!");
-            State = internalState.FireMario;
-            GotCoins(200);
+            state.GotFireFlower();
         }
         public void GotFeather()
         {
-            Console.WriteLine("Got Feather!");
-            State = internalState.CapMario;
-            GotCoins(300);
+            state.GotFeather();
         }
         public void GotCoins(int numberOfCoins)
         {
@@ -73,15 +83,7 @@ namespace FiniteStateMachine
         }
         public void MetMonster()
         {
-            Console.WriteLine("Met Monster!");
-            if (State == internalState.SmallMario)
-            {
-                LostLife();
-            }
-            else
-            {
-                State = internalState.SmallMario;
-            }
+            state.MetMonster();
         }
         public void GameOver()
         {
@@ -91,7 +93,135 @@ namespace FiniteStateMachine
         }
         public override string ToString()
         {
-            return $"State: {State} | LifeCount: {LifeCount} | CoinsCount: {CoinCount} \n";
+            return $"State: {state} | LifeCount: {LifeCount} | CoinsCount: {CoinCount} \n";
+        }
+    }
+
+    class SmallMario : IState
+    {
+        private FiniteStateMachine fsm;
+        public SmallMario(FiniteStateMachine fsm)
+        {
+            this.fsm = fsm;
+        }
+        public void GotMushroom()
+        {
+            Console.WriteLine("Got Mushroom!");
+            fsm.state = fsm.GetState("superMario");
+            fsm.GotCoins(100);
+        }
+
+        public void GotFireFlower()
+        {
+            Console.WriteLine("Got FireFlower!");
+            fsm.state = fsm.GetState("fireMario");
+            fsm.GotCoins(200);
+        }
+
+        public void GotFeather()
+        {
+            Console.WriteLine("Got Feather!");
+            fsm.state = fsm.GetState("capeMario");
+            fsm.GotCoins(300);
+        }
+
+        public void MetMonster()
+        {
+            Console.WriteLine("Met Monster!");
+            fsm.state = fsm.GetState("smallMario");
+            fsm.LostLife();
+        }
+    }
+
+    class SuperMario : IState
+    {
+        private FiniteStateMachine fsm;
+        public SuperMario(FiniteStateMachine fsm)
+        {
+            this.fsm = fsm;
+        }
+        public void GotMushroom()
+        {
+            Console.WriteLine("Got Mushroom");
+            fsm.GotCoins(100);
+        }
+        public void GotFireFlower()
+        {
+            Console.WriteLine("Got FireFlower");
+            fsm.state = fsm.GetState("fireMario");
+            fsm.GotCoins(200);
+        }
+        public void GotFeather()
+        {
+            Console.WriteLine("Got Feather!");
+            fsm.state = fsm.GetState("capeMario");
+            fsm.GotCoins(300);
+        }
+        public void MetMonster()
+        {
+            Console.WriteLine("Met Monster!");
+            fsm.state = fsm.GetState("smallMario");
+        }
+    }
+
+    class FireMario : IState
+    {
+        private FiniteStateMachine fsm;
+        public FireMario(FiniteStateMachine fsm)
+        {
+            this.fsm = fsm;
+        }
+        public void GotMushroom()
+        {
+            Console.WriteLine("Got Mushroom!");
+            fsm.GotCoins(100);
+        }
+        public void GotFireFlower()
+        {
+            Console.WriteLine("Got FireFlower!");
+            fsm.GotCoins(200);
+        }
+        public void GotFeather()
+        {
+            Console.WriteLine("Got Feather!");
+            fsm.state = fsm.GetState("capeMario");
+            fsm.GotCoins(300);
+        }
+        public void MetMonster()
+        {
+            Console.WriteLine("Met Monster!");
+            fsm.state = fsm.GetState("smallMario");
+        }
+
+    }
+
+    class CapeMario : IState
+    {
+        private FiniteStateMachine fsm;
+        public CapeMario(FiniteStateMachine fsm)
+        {
+            this.fsm = fsm;
+        }
+        public void GotMushroom()
+        {
+            Console.WriteLine("Got Mushroom!");
+            fsm.GotCoins(100);
+        }
+        public void GotFireFlower()
+        {
+            Console.WriteLine("Got FireFlower!");
+            fsm.state = fsm.GetState("fireMario");
+            fsm.GotCoins(200);
+        }
+        public void GotFeather()
+        {
+            Console.WriteLine("Got Feather!");
+            fsm.GotCoins(300);
+        }
+        public void MetMonster()
+        {
+            Console.WriteLine("Met Monster!");
+            fsm.state = fsm.GetState("smallMario");
         }
     }
 }
